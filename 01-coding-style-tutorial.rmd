@@ -1,0 +1,288 @@
+---
+title: "Good Coding style in R"
+output:
+  html_document:
+    toc: TRUE
+    theme: united
+---
+
+
+[Go back to Index](index.html)
+
+<!-- # Good Coding style -->
+
+**Much of this handout was written by Nick Parlante, Eric Roberts, and Mehran Sahami for students taking CS106A: Introduction to Computing Principles. It was addapted by Bobbie McDonald to be slightly to be more applicable to R programming. I just added a couple of extra notes.**
+
+**It's also worth taking a look at Google's style guide for R code: [https://google.github.io/styleguide/Rguide.xml](https://google.github.io/styleguide/Rguide.xml).**
+
+----
+
+When writing a paper, you can have well-crafted, correctly spelled sentences and create "A" work. Or you can hack out the text in a hurry. It will not look as good, but it can convey your thoughts and get the job done; it's worth maybe a "B" or a "C". *Computer code is not like that.* Code that is messy tends to have all sorts of bugs and other problems. The problems and bugs in poorly written code tend to compound each other and pile up, so the code ends up being nearly worthless. It has bugs. Nobody knows how to fix them or add features without creating more bugs. Once code is in that state, it is hard to escape. In a sense, code tends to be more either "A", or "D" or "F". Therefore, it is best to write code that is clean to start, and keep it clean as you add features. This is one of the lessons in computer science for successfully building large projects. 
+
+One reason to write clean, well-structured code is that it works better and takes less time in the end. The other reason to write clean code is that it is just more satisfying to do a good job on something. Clear, elegant code feels right, just like any other engineering or artistic creation.
+
+**Moral of the story: Don't write messy code! Clean code is much easier to work with and less likely to result in bugs that take a long time to smooth out. Clean code also makes your collaborators much happier and makes it easier for you to remember your own code when you look at it again several weeks later.**
+
+
+## The messy code trap
+It is a basic fact of computer science that poorly designed, messy code is harder to build and debug than clean code. It is tempting to just type out a quick solution as it occurs to you to get started. It is better to take a little more time at the start to build the clean version, creating fewer headaches in the debugging phase. Once code gets messy, it's hard to clean it up. It's easier to start clean, and then keep it clean with each addition. The worst possible strategy is to build the messy version, do your debugging on that, and then clean it up before turning it in - all the work and little of the benefit! Do it the right way from the start, and you'll be happier.
+
+## Readable code
+One metric for good code is that it "reads" nicely -that someone sweeping their eye over the code can see the algorithmic idea at hand. The original programmer had an idea in mind- a way to solve the problem. Does the code communicate that idea? Writing readable code is important both because it will help any future reader and because it helps you avoid your own bugs. Bugs, after all, are simply where the code expresses an idea, but it is not the idea you had in mind. Readable code has fewer bugs.
+
+## Variable names
+The first step in readable code is choosing good names for variables (i.e. your constants, vectors, dataframes, et cetera). Typically a variable gets a noun name that reflects what it stores - e.g. `width`, `pollData`, `gender`, `numSims`. 
+
+**In R**, it's common to use `.` or `_` to separate words in variable names, such as `poll_data`, `df_census`, or `num.sims`. 
+
+But you can also use other naming styles, as long as you do your best to remain consistent. For instance, **In Java**, the convention is to begin variables with the first word lowercase, and uppercase later words like this: `bestScore`, `remainingCreamPuffs`. This notation is often refered to as "Camel Case", since the capitalization of letters in the middle of the name is similar to humps on a camel. 
+
+There are also a few idiomatic one-letter names, such as `i`, `j`, `k` for integer loop counters or `X` and `Y` for independent and dependent variables in a simulation. These are in such wide use that they make very readable code just by familiarity.
+
+## Function names
+If variables names are the nouns, function names are the verbs. Function names should reflect the action they perform (e.g. `rowSums()`, `plotResults()`, `crossValidate()`). Functions that return a boolean are often named starting with "is" or "has" (e.g. `is.integer()`, `is.na()`).
+
+## Whitespace
+*Use whitespace to help separate the logical parts of the code, in much the same way that paragraphs separate groups of sentences.*
+
+Rather than write a block of 20 lines, it's nice to put in blank lines to separate the code into its natural 6-line sections that accomplish logical sub-parts of the computation. Each little section of code might have a comment to describe what it accomplishes. Likewise, you can use whitespace to show the logical grouping of elements within a line. Do not run everything together with no spaces. 
+
+## Comments
+Comments add human context to the raw lines of code. They explain the overall flow and strategy of what is going on. Comments point out assumptions or issues that affect a part of the program that are not obvious from the code itself.
+
+As you write larger and more complex pieces of code, comments help you keep track of your own assumptions and ideas as you are building and testing various parts of the code. There gets to be more than you can keep in your head at one time. The first step is good variable and function names. They make the code "read" well on its own, so fewer comments are required.
+
+### Script comments
+It is always useful to start your code with a description of the overall purpose of a script. For example "In this code I create my own OLS function". Even a short description of your code will help you remember the intention of the document and might save some time in the future. Starting your code with a good description its also helpful for replicability. 
+
+### Variable comments
+Sometimes the meaning of a variable is completely clear just from its name. For a complex variable, there is often extra contextual information about the variable that the code must be consistent about. For instance, if you create a new data vector called `countryPopulation`, you'll want to add a comment describing what its units are (i.e. is it in thousands of people? millions of people?) and if there are any qualifications (i.e. excludes temporary workers). The comment for a variable can capture this extra information about the variable in one place.
+
+<span style="color:red">BAD CODE</span>:
+
+```{r eval=FALSE}
+library(ggplot2)
+library(plyr)
+library(reshape2)
+set.seed(4319)
+n<-1000 
+D<-c(rep(0,n/2), rep(1,n/2))  
+head(D)
+X<-as.factor(sample(c(1,2,3,4),n,replace=TRUE))  
+head(X)
+model<-model.matrix(~ D*X) 
+print(head(model))
+betas<-c(-1,0.2,0,0,0,0.4,-0.8,0)  
+probY<-1/(1+exp(-1*(model %*% betas))) 
+Y<-rbinom(n,1,probY)
+head(cbind(probY,Y))
+
+```
+
+<span style="color:orange">Good CODE</span>:
+
+
+```{r eval=FALSE}
+library(ggplot2)
+library(plyr)
+library(reshape2)
+
+set.seed(4319)
+n<-1000  # number of observations
+D<-c(rep(0,n/2), rep(1,n/2))  # treatment assignment
+head(D)
+X<-as.factor(sample(c(1,2,3,4),n,replace=TRUE))  # creates a covariate with 4 levels by taking n samples from the vector c(1,2,3,4) with replacement.
+head(X)
+model<-model.matrix(~ D*X) # creates the model matrix:
+print(head(model))
+betas<-c(-1,0.2,0,0,0,0.4,-0.8,0)  # model coefficients for intercept, D, X2, X3, X4, X2:D, X3:D, X4:D.
+probY<-1/(1+exp(-1*(model %*% betas))) # generates dichotomous y from logistic transformation.
+Y<-rbinom(n,1,probY)
+head(cbind(probY,Y))
+
+```
+
+<span style="color:green">Even better CODE</span>:
+
+```{r eval=FALSE}
+########################################
+#     TITLE: A description of this code
+#     Author
+#     Last modified
+#######################################
+
+#### Libraries
+library(ggplot2)
+library(plyr)
+library(reshape2)
+#####
+
+
+set.seed(4319)  # Set seed for replicability
+
+n <- 1000  # number of observations
+D <- c(rep(0, n/2), rep(1, n/2))  # treatment assignment
+head(D)
+
+# creates a covariate with 4 levels by taking n samples from the vector c(1,2,3,4) 
+# with replacement.
+X <- as.factor(sample(c(1, 2, 3, 4), n, replace=TRUE))  
+head(X)
+
+# creates the model matrix:
+model <- model.matrix( ~ D * X)
+print(head(model))
+
+# model coefficients for intercept, D, X2, X3, X4, X2:D, X3:D, X4:D.
+betas <- c(-1, 0.2, 0, 0, 0, 0.4, -0.8, 0)  
+
+# generates dichotomous y from logistic transformation.
+probY <- 1 / (1 + exp(-1 * (model %*% betas)))
+Y <- rbinom(n, 1, probY)
+head(cbind(probY, Y))
+
+```
+
+
+## Indentation
+All programming languages use indentation to show which parts of the code are "nested" in other parts. In R Studio and most text editors, you can select a few lines and use tab to move them all right one level, and shift-tab to move them all left one level. 
+
+<span style="color:red">BAD CODE</span>:
+
+```{r eval=FALSE}
+# this loop prints out element i from the vector randomNumbers at each iteration.
+randomNumbers <- round(runif(10, 0, 10), 0)
+for (i in 1:length(randomNumbers)) {
+print(randomNumbers[i])
+}
+
+# this double-loop prints out i, j, and i+j at each iteration.
+for (i in 1:3) {
+for (j in 1:5) {
+print(c(i, j, i+j))
+}
+}
+```
+
+<span style="color:green">GOOD CODE</span>:
+
+```{r eval=FALSE}
+# this loop prints out element i from the vector randomNumbers at each iteration.
+randomNumbers <- round(runif(10, 0, 10), 0)
+for (i in 1:length(randomNumbers)) {
+    print(randomNumbers[i])
+}
+
+# this double-loop prints out i, j, and i+j at each iteration.
+for (i in 1:3) {
+    for (j in 1:5) {
+        print(c(i, j, i+j))
+    }
+}
+```
+
+
+### Function comments
+Function comments should describe what the function accomplishes. Emphasize what the function does for the caller, not how it is implemented. The comment should describe what the function does to the receiver object, adding in the role of any parameters. In the standard comment style used with javadoc, the function comment begin with a verb in the third-person singular form (typically ending in "s") describing what the function does. For a complex function, the comment can address the "preconditions" that should be true before the function is called, and the "postconditions" that will be true after it is done.
+
+An example of function commenting is shown below:
+
+```{r eval=FALSE}
+# --------------------------------------------- #
+# FUNCTION: ggplotAMCEs()
+# USAGE: p1 <- ggplotAMCEs(df, coefNames, effect, lowerCI, upperCI, colorFactor, effectName, 
+#   title, ylab, xlimits)
+# ------------ #
+# DESCRIPTION:
+# Takes in a dataframe containing regression results and returns a color-coded dotchart including 
+# errorbars. The function was originally written to display the average marginal component 
+# effects (AMCEs) computed for a conjoint survey experiment using linear regression.
+# 
+# PARAMETERS:
+#   df (dataframe): dataframe containing the regression results.
+#   coefNames (string): column name in df in which the variable names are stored.
+#   effect (string): column name in df in which the coefficients are stored.
+#   lowerCI (string): column name in df in which the lower confidence interval is stored.
+#   upperCI (string): column name in df in which the upper confidence interval is stored.
+#   colorFactor (string): column name in df which groups the coefficients (to be used for coloring 
+#       the plotted lines by group). 
+#   effectName (string): name of the outcome variable (to be used as label for x-axis). 
+#   title (string): plot title. NULL by default.
+#   ylab (string): y-axis label. NULL by default.
+#   xlimits: limits for x-axis
+# 
+# --------------------------------------------- #
+ggplotAMCEs <- function(df, coefNames, effect, lowerCI, upperCI, colorFactor, effectName, title=NULL, ylab=NULL, xlimits) {
+    df <- rbind(df1, df2)
+    plot <- ggplot(df, aes_string(x=effect, y=coefNames, colour=colorFactor)) +
+        facet_grid(attribute~sample, scales="free_y", space="free_y") +
+        geom_vline(xintercept=0, color="gray70", size=0.3, linetype="solid") +
+        geom_point() +
+        geom_errorbarh(data=df, aes_string(x=effect, y=coefNames, xmin=lowerCI, xmax=upperCI, colour=colorFactor),height=0, size=0.4) +
+        scale_x_continuous(name=effectName, limits=xlimits) +  
+        theme(text = element_text(size=10)) + 
+        labs(y=ylab, title=title) +
+        guides(colour=FALSE) + 
+        theme_bw()
+    return(plot)    
+}
+```
+
+<!-- ### Class comments
+Each class should have a comment summarizing what it does. Typically the class comment will mention what sort of data the class encapsulates and what sort of functions it implements. Professional quality documentation for a class or group of classes intended for use by others, such as the String class, will also have a few introductory paragraphs of discussion of what sort of problems the class solves and what typical client use of the class looks like. For a system of classes, there may be an architectural overview that summarizes the role of each class and how they all fit together to build the program.
+ -->
+
+## Working directories
+
+The working directory is the place in your computer where R will be running the script. To set the working directory you can use the drop down menu.. You can also change the working directory by typing `setwd("Path")`
+
+
+```{r, results='hide'}
+# PLEASE CHANGE YOUR WORKING DIRECTORY NOW (uncomment and type your own path)
+
+#setwd("Your directory")
+
+```
+
+It is advisable setting the working directory from your script instead of using the drop down menu. This is particularly useful when working in teams or from a shared folder.
+
+The working directory can be set in your computer, in your AFS space at Stanford, or in some other location that you can access through your computer.
+
+For example, a working directory in the AFS space at Stanford looks like this
+
+"/afs/ir.stanford.edu/users/g/r/grobles/Documents"
+
+** NOTE FOR WINDOWS USERS
+
+* R understands $\$ as an escape character. You can both use
+* 	"c:/path/folder"     	
+
+OR
+
+*		"c://path//folder"
+
+
+```{r, results='hide'}
+# To display the current working directory use getwd()
+
+getwd()
+
+```
+
+
+Once the working directory is set, it is relatively simple to access files in sub-folders and parent folders.
+
+
+## Decomposition
+
+*(Good decomposition will become more relevant once we introduce Python.)*
+
+Decomposition is the most valuable tool you have for tackling complex problems. It is much easier to design, implement, and debug small functional units in isolation than to attempt to do so with a much larger chunk of code. Remember that writing a program first and decomposing after the fact is not only difficult, but prone to producing poor results. You should decompose the problem, and write the program from that already decomposed framework. In other words, you are aiming to decompose problems, not programs!
+
+The decomposition should be logical and readable. A reader shouldn't need to twist her head around to follow how the program works. Sensible breakdown into modular units and good naming conventions are essential. Functions should be short and to the point.
+
+Strive to design functions that are general enough for a variety of situations and achieve specifics through use of parameters. This will help you avoid redundant functions — sometimes the implementation of two or more functions can be sensibly unified into one general function, resulting in less code to develop, comment, maintain, and debug. **Avoid repeated code.** Even a handful of lines repeated is worth breaking out into a helper function called in both situations.
+
+## Attribution
+All code copied from books, handouts or other sources, and any assistance received from other students, section leaders, fairy godmothers, etc. must be cited. We consider this an important tenet of academic integrity. For example, if I had adapted the `ggplotAMCEs()` function from an online source, I should have mentioned so in the comments (e.g. "This function is adapted from www.some-ggplot-code.com"). 
+
